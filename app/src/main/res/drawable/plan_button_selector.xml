@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Эффект при нажатии -->
+    <item android:state_pressed="true">
+        <layer-list>
+            <!-- Основная кнопка -->
+            <item
+                android:drawable="@drawable/plan_button"
+                android:width="150dp"
+                android:height="150dp"
+                android:gravity="center" />
+
+            <!-- Затемняющая маска -->
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="#66000000" /> <!-- 40% чёрный -->
+                    <corners android:radius="75dp" /> <!-- Полный радиус круга -->
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+
+    <!-- Состояние по умолчанию -->
+    <item>
+        <layer-list>
+            <item
+                android:drawable="@drawable/plan_button"
+                android:width="150dp"
+                android:height="150dp"
+                android:gravity="center" />
+        </layer-list>
+    </item>
+
+</selector>

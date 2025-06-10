@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@drawable/row_bg"
+    android:paddingVertical="8dp">
+
+    <TextView style="@style/PlanCellLevel" />
+    <TextView style="@style/PlanCell" />
+    <TextView style="@style/PlanCellGreen" />
+    <TextView style="@style/PlanCell" />
+    <TextView style="@style/StatusDone" />
+</TableRow>

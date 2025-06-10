@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="PushupBorderButton">
+        <item name="android:background">@drawable/button_bordered</item>
+        <item name="android:textColor">#FFD700</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">12dp</item>
+    </style>
+
+    <style name="PlainTextButton" parent="Widget.AppCompat.Button">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">64sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:padding">0dp</item>
+    </style>
+
+    <!-- Стиль для текста даты -->
+    <style name="CustomCalendarText">
+        <item name="android:textColor">#FFFFFF</item> <!-- Белый текст -->
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <!-- Стиль для текста дней недели -->
+    <style name="CustomCalendarDayOfWeekText">
+        <item name="android:textColor">#FFFFFF</item> <!-- Белый текст -->
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <!-- Стиль для текста заголовка (месяц) -->
+    <style name="CustomCalendarHeaderText">
+        <item name="android:textColor">#FFFFFF</item> <!-- Белый текст -->
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="PlanTableHeader">
+        <item name="android:layout_margin">4dp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">8dp</item>
+    </style>
+
+    <style name="PlanCell">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">6dp</item>
+    </style>
+
+    <style name="PlanCellGreen" parent="PlanCell">
+        <item name="android:textColor">#00695C</item> <!-- темно-зелёный -->
+    </style>
+
+    <style name="PlanCellLevel" parent="PlanCell">
+        <item name="android:background">@drawable/cell_level_bg</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="PlanCellRest" parent="PlanCell">
+        <item name="android:background">@drawable/cell_rest_bg</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="StatusDone" parent="PlanCell">
+        <item name="android:background">@drawable/status_done_bg</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="StatusWork" parent="PlanCell">
+        <item name="android:background">@drawable/status_work_bg</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="SetInput">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/input_background</item>
+        <item name="android:inputType">number</item>
+        <item name="android:maxLength">2</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:gravity">center</item>
+    </style>
+</resources>

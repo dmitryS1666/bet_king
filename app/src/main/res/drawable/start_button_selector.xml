@@ -1,0 +1,33 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:state_pressed="true">
+        <layer-list>
+            <!-- Сама кнопка -->
+            <item
+                android:drawable="@drawable/start_button"
+                android:width="120dp"
+                android:height="120dp"
+                android:gravity="center" />
+
+            <!-- Полупрозрачная чёрная маска (с круглыми углами) -->
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="#66000000" /> <!-- 40% чёрный -->
+                    <corners android:radius="60dp" /> <!-- Радиус для круглых углов -->
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+
+    <item>
+        <layer-list>
+            <!-- Обычная кнопка без затемнения -->
+            <item
+                android:drawable="@drawable/start_button"
+                android:width="120dp"
+                android:height="120dp"
+                android:gravity="center" />
+        </layer-list>
+    </item>
+
+</selector>

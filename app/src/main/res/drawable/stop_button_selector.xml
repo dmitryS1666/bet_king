@@ -1,0 +1,31 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Эффект при нажатии -->
+    <item android:state_pressed="true">
+        <layer-list>
+            <item
+                android:drawable="@drawable/stop_button"
+                android:width="200dp"
+                android:height="200dp"
+                android:gravity="center" />
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="#66000000" />
+                    <corners android:radius="100dp" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+
+    <!-- Состояние по умолчанию -->
+    <item>
+        <layer-list>
+            <item
+                android:drawable="@drawable/stop_button"
+                android:width="200dp"
+                android:height="200dp"
+                android:gravity="center" />
+        </layer-list>
+    </item>
+
+</selector>
