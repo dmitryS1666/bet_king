@@ -2,6 +2,7 @@ package com.kett.bing.ui
 
 import android.annotation.SuppressLint
 import android.content.Context.MODE_PRIVATE
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,7 +10,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.SeekBar
+import android.widget.Switch
 import androidx.fragment.app.Fragment
+import com.kett.bing.BannerWebActivity
 import com.kett.bing.MainActivity
 import com.kett.bing.R
 
@@ -23,8 +27,12 @@ class MainFragment : Fragment() {
         sharedPreferences = requireActivity().getSharedPreferences("UserData", MODE_PRIVATE)
 
         val view = inflater.inflate(R.layout.fragment_main, container, false)
-
+        val settingsButton: Button = view.findViewById(R.id.settingsButton)
         val startButton: Button = view.findViewById(R.id.startButton)
+
+        settingsButton.setOnClickListener {
+            (activity as? MainActivity)?.openFragment(SettingsFragment())
+        }
 
         // Обработчик нажатия на кнопку
         startButton.setOnClickListener {
@@ -58,5 +66,4 @@ class MainFragment : Fragment() {
 
         dialog.show()
     }
-
 }
