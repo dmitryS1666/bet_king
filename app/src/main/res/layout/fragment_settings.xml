@@ -113,18 +113,20 @@
                         android:orientation="horizontal">
 
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:text="VIBRO"
                             android:textColor="#FFA500"
-                            android:layout_marginEnd="8dp"
                             android:textSize="18sp"
                             android:textStyle="bold"/>
 
                         <Switch
                             android:id="@+id/vibrationSwitch"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
+                            android:layout_height="wrap_content"
+                            android:thumbTint="@color/switch_thumb_color"
+                            android:trackTint="@color/switch_track_color"/>
                     </LinearLayout>
 
                     <!-- Privacy -->

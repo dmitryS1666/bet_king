@@ -6,14 +6,16 @@ import android.os.Bundle
 import android.view.*
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.Switch
-import androidx.fragment.app.DialogFragment
+import android.widget.Toast
+import androidx.fragment.app.Fragment
 import com.kett.bing.BannerWebActivity
 import com.kett.bing.MusicPlayerManager
 import com.kett.bing.R
 
-class SettingsFragment : DialogFragment() {
+class SettingsFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -30,7 +32,7 @@ class SettingsFragment : DialogFragment() {
         val musicSeekBar = view.findViewById<SeekBar>(R.id.musicVolume)
         val soundSeekBar = view.findViewById<SeekBar>(R.id.soundVolume)
         val vibrationSwitch = view.findViewById<Switch>(R.id.vibrationSwitch)
-        val webButton = view.findViewById<Button>(R.id.btnPrivacy)
+        val webButton = view.findViewById<LinearLayout>(R.id.btnPrivacy)
 
         // Настройка текущих значений (можно расширить)
         musicSeekBar.progress = prefs.getInt("music_volume", 50)
@@ -40,7 +42,7 @@ class SettingsFragment : DialogFragment() {
         musicSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
                 prefs.edit().putInt("music_volume", progress).apply()
-                // можно управлять громкостью через AudioManager
+                MusicPlayerManager.setVolume(progress)
             }
 
             override fun onStartTrackingTouch(sb: SeekBar?) {}
@@ -61,11 +63,21 @@ class SettingsFragment : DialogFragment() {
         }
 
         webButton.setOnClickListener {
-            dismiss()
             val url = "https://bedkingthegame.com/policy"
             val intent = Intent(requireContext(), BannerWebActivity::class.java)
             intent.putExtra("url", url)
             startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.deleteScoreButton).setOnClickListener {
+            // Очистка результата
+            val prefs = requireContext().getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+            prefs.edit()
+                .remove("game_score") // замените на нужный ключ, если другой
+                .apply()
+
+            // Показываем Toast
+            Toast.makeText(requireContext(), "Game results cleared", Toast.LENGTH_SHORT).show()
         }
 
         view.findViewById<ImageView>(R.id.btnHome).setOnClickListener {
@@ -75,10 +87,10 @@ class SettingsFragment : DialogFragment() {
 
     override fun onStart() {
         super.onStart()
-        dialog?.window?.setLayout(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        dialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
+//        dialog?.window?.setLayout(
+//            ViewGroup.LayoutParams.MATCH_PARENT,
+//            ViewGroup.LayoutParams.WRAP_CONTENT
+//        )
+//        dialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
     }
 }

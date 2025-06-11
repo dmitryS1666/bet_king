@@ -138,6 +138,7 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         supportFragmentManager.beginTransaction()
             .replace(R.id.mainFragmentContainer, fragment)
+            .addToBackStack(null)
             .commit()
     }
 
