@@ -5,8 +5,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FF00FF"
-    android:fitsSystemWindows="false">
+    android:background="@android:color/transparent"
+    android:fitsSystemWindows="false"
+    android:clipChildren="true"
+    android:clipToPadding="true">
 
     <!-- Фон -->
     <ImageView

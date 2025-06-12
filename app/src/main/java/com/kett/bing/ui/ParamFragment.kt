@@ -91,9 +91,6 @@ class ParamFragment : Fragment() {
                     .replace(R.id.mainFragmentContainer, planFragment)
                     .addToBackStack(null)
                     .commit()
-
-                (requireActivity() as? MainActivity)?.showBottomNav()
-                (requireActivity() as? MainActivity)?.updateNavIcons("plan")
             }
         }
 

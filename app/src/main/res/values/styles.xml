@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <style name="FullScreenDialog" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="FullScreenDialogTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
     <style name="PushupBorderButton">
         <item name="android:background">@drawable/button_bordered</item>
         <item name="android:textColor">#FFD700</item>
@@ -16,24 +31,6 @@
         <item name="android:minWidth">0dp</item>
         <item name="android:minHeight">0dp</item>
         <item name="android:padding">0dp</item>
-    </style>
-
-    <!-- Стиль для текста даты -->
-    <style name="CustomCalendarText">
-        <item name="android:textColor">#FFFFFF</item> <!-- Белый текст -->
-        <item name="android:textSize">16sp</item>
-    </style>
-
-    <!-- Стиль для текста дней недели -->
-    <style name="CustomCalendarDayOfWeekText">
-        <item name="android:textColor">#FFFFFF</item> <!-- Белый текст -->
-        <item name="android:textSize">14sp</item>
-    </style>
-
-    <!-- Стиль для текста заголовка (месяц) -->
-    <style name="CustomCalendarHeaderText">
-        <item name="android:textColor">#FFFFFF</item> <!-- Белый текст -->
-        <item name="android:textSize">18sp</item>
     </style>
 
     <style name="PlanTableHeader">
