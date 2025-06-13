@@ -84,8 +84,7 @@ class MainFragment : Fragment() {
 
         dialogView.findViewById<Button>(R.id.bonusGameButton).setOnClickListener {
             dialog.dismiss()
-            println("bonus game")
-            // (activity as? MainActivity)?.openWorkoutFragment()
+            startActivity(Intent(requireContext(), MinerActivity::class.java))
         }
 
         dialog.show()

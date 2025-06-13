@@ -28,6 +28,10 @@
             android:theme="@style/FullScreenDialogTheme"
             android:exported="false"/>
 
+        <activity android:name=".ui.MinerActivity"
+            android:theme="@style/FullScreenDialogTheme"
+            android:exported="false"/>
+
         <!-- Стартовая активити -->
         <activity
             android:name=".SplashActivity"

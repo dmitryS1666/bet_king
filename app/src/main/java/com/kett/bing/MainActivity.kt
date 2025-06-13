@@ -14,7 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.kett.bing.ui.LoadingFragment
 import com.kett.bing.ui.MainFragment
-import com.kett.bing.ui.WorkoutPlanConstants
+import com.kett.bing.ui.MinerActivity
 import com.kett.bing.ui.theme.KettBingTheme
 import java.util.Locale
 
@@ -26,7 +26,6 @@ class MainActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.statusBarColor = Color.TRANSPARENT
 
-        WorkoutPlanConstants.loadIndividualPlans(this)
         setContentView(R.layout.activity_main)
 
         // Принудительно установить английскую локаль
