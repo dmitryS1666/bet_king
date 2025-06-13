@@ -7,18 +7,16 @@ import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.view.View
-import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.kett.bing.R
 
-class WinDialogActivity : AppCompatActivity() {
+class LoseDialogActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.win_dialog) // или как называется твой layout
+        setContentView(R.layout.lose_dialog)
 
         window.decorView.systemUiVisibility = (
                 View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
@@ -31,15 +29,8 @@ class WinDialogActivity : AppCompatActivity() {
         window.navigationBarColor = Color.TRANSPARENT
         window.statusBarColor = Color.TRANSPARENT
 
-        // Получение score
-        val score = intent.getIntExtra("score", 0)
-
-        val fireworksImage = findViewById<ImageView>(R.id.fireworksImage)
         val kingImage = findViewById<ImageView>(R.id.kingImage)
-        val scoreText = findViewById<TextView>(R.id.scoreText)
         val menuButton = findViewById<ImageButton>(R.id.menuButton)
-
-        scoreText.text = "TOTAL\nPOINTS: $score"
 
         // Кнопка назад в меню
         menuButton.setOnClickListener {
@@ -47,14 +38,6 @@ class WinDialogActivity : AppCompatActivity() {
         }
 
         // Включаем анимацию
-        fireworksImage.visibility = View.VISIBLE
-        fireworksImage.alpha = 0f
-        fireworksImage.animate()
-            .alpha(1f)
-            .setDuration(1000)
-            .setInterpolator(AccelerateInterpolator())
-            .start()
-
         kingImage.visibility = View.VISIBLE
         kingImage.translationX = 200f
         kingImage.translationY = 200f

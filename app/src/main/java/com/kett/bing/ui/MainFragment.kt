@@ -40,7 +40,8 @@ class MainFragment : Fragment() {
         val startButton: Button = view.findViewById(R.id.startButton)
 
         settingsButton.setOnClickListener {
-            showWinDialog(200)
+            showLoseDialog()
+//            showWinDialog(200)
 //            (activity as? MainActivity)?.openFragment(SettingsFragment())
         }
 
@@ -56,6 +57,12 @@ class MainFragment : Fragment() {
     private fun showWinDialog(score: Int) {
         val intent = Intent(requireContext(), WinDialogActivity::class.java)
         intent.putExtra("score", score)
+        startActivity(intent)
+    }
+
+    @SuppressLint("MissingInflatedId")
+    private fun showLoseDialog() {
+        val intent = Intent(requireContext(), LoseDialogActivity::class.java)
         startActivity(intent)
     }
 
