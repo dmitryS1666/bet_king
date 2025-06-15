@@ -78,8 +78,10 @@ class MainFragment : Fragment() {
 
         dialogView.findViewById<Button>(R.id.game3InRowButton).setOnClickListener {
             dialog.dismiss()
-            println("3Game")
-            // (activity as? MainActivity)?.startMatch3Game()
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.mainFragmentContainer, Match3Fragment())
+                .addToBackStack(null)
+                .commit()
         }
 
         dialogView.findViewById<Button>(R.id.bonusGameButton).setOnClickListener {
