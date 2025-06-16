@@ -3,7 +3,7 @@
     <item android:id="@android:id/background">
         <shape android:shape="rectangle">
             <corners android:radius="10dp" />
-            <size android:height="8dp" />
+            <size android:height="50px" />
             <solid android:color="#C06A02" />
         </shape>
     </item>
@@ -13,7 +13,7 @@
         <clip>
             <shape android:shape="rectangle">
                 <corners android:radius="10dp" />
-                <size android:height="8dp" />
+                <size android:height="50px" />
                 <solid android:color="#FA8800" />
             </shape>
         </clip>

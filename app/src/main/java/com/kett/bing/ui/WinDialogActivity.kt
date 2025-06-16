@@ -1,6 +1,7 @@
 package com.kett.bing.ui
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -13,6 +14,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.kett.bing.MainActivity
 import com.kett.bing.R
 
 class WinDialogActivity : AppCompatActivity() {
@@ -43,6 +45,9 @@ class WinDialogActivity : AppCompatActivity() {
 
         // Кнопка назад в меню
         menuButton.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            startActivity(intent)
             finish()
         }
 

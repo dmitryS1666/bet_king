@@ -131,8 +131,8 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun showBanner(json: JSONObject) {
-        val action = json.optString("pushLink", null)
-        val imageUrl = json.optString("dontStop", null)
+        val action = json.optString("GoKing", null)
+        val imageUrl = json.optString("kingImg", null)
 
         if (imageUrl != null) {
             Glide.with(this)

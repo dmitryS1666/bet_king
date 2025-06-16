@@ -79,13 +79,14 @@
                         android:textStyle="bold"/>
 
                     <!-- Sound Volume -->
+
                     <SeekBar
                         android:id="@+id/musicVolume"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:max="100"
                         android:progressDrawable="@drawable/seekbar_custom"
-                        android:thumb="@drawable/seekbar_thumb" />
+                        android:thumb="@drawable/thumb_layer" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -96,15 +97,15 @@
                         android:textSize="18sp"
                         android:textStyle="bold"/>
 
+                    <!-- Vibration Switch -->
                     <SeekBar
                         android:id="@+id/soundVolume"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:max="100"
                         android:progressDrawable="@drawable/seekbar_custom"
-                        android:thumb="@drawable/seekbar_thumb" />
+                        android:thumb="@drawable/thumb_layer" />
 
-                    <!-- Vibration Switch -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"

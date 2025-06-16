@@ -12,6 +12,7 @@ import android.widget.Switch
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.kett.bing.BannerWebActivity
+import com.kett.bing.MainActivity
 import com.kett.bing.MusicPlayerManager
 import com.kett.bing.R
 
@@ -81,7 +82,7 @@ class SettingsFragment : Fragment() {
         }
 
         view.findViewById<ImageView>(R.id.btnHome).setOnClickListener {
-            parentFragmentManager.popBackStack()
+            (activity as? MainActivity)?.openMainFragment()
         }
     }
 

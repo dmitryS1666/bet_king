@@ -3,18 +3,20 @@ package com.kett.bing.ui
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
-import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import com.kett.bing.MainActivity
 import com.kett.bing.R
 
-class MinerActivity : AppCompatActivity() {
+class MinerFragment : Fragment() {
+
     private lateinit var buttons: List<ImageButton>
     private lateinit var currentScoreText: TextView
     private lateinit var currentScoreLabel: TextView
@@ -29,15 +31,18 @@ class MinerActivity : AppCompatActivity() {
     private val gameDurationMillis = 15_000L
     private var cardFlipped = false
 
-    private var openSoundPlayer: MediaPlayer? = null
-    private var winSoundPlayer: MediaPlayer? = null
-    private var loseSoundPlayer: MediaPlayer? = null
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_miner, container, false)
+    }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.fragment_miner)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        window.decorView.systemUiVisibility = (
+        // Системные флаги (fullscreen и т.п.) обычно ставятся в Activity, но если хочешь — можешь вызвать через requireActivity()
+        requireActivity().window.decorView.systemUiVisibility = (
                 View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                         or View.SYSTEM_UI_FLAG_FULLSCREEN
                         or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
@@ -45,31 +50,26 @@ class MinerActivity : AppCompatActivity() {
                         or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                         or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 )
-        window.navigationBarColor = Color.TRANSPARENT
-        window.statusBarColor = Color.TRANSPARENT
+        requireActivity().window.navigationBarColor = Color.TRANSPARENT
+        requireActivity().window.statusBarColor = Color.TRANSPARENT
 
         buttons = listOf(
-            findViewById(R.id.cell0),
-            findViewById(R.id.cell1),
-            findViewById(R.id.cell2),
-            findViewById(R.id.cell3),
+            view.findViewById(R.id.cell0),
+            view.findViewById(R.id.cell1),
+            view.findViewById(R.id.cell2),
+            view.findViewById(R.id.cell3),
         )
 
-        openSoundPlayer = MediaPlayer.create(this, R.raw.open_cart_sound)
-        winSoundPlayer = MediaPlayer.create(this, R.raw.win_sound)
-        loseSoundPlayer = MediaPlayer.create(this, R.raw.fail_sound)
-
-        currentScoreText = findViewById(R.id.currentScoreText)
-        currentScoreLabel = findViewById(R.id.currentScoreLabel)
-
-        timerText = findViewById(R.id.timerText)
-        resetButton = findViewById<ImageButton>(R.id.finishButton)
+        currentScoreText = view.findViewById(R.id.currentScoreText)
+        currentScoreLabel = view.findViewById(R.id.currentScoreLabel)
+        timerText = view.findViewById(R.id.timerText)
+        resetButton = view.findViewById<ImageButton>(R.id.finishButton)
 
         resetButton.setOnClickListener { finishGame() }
 
         startGame()
 
-        val settingsButton: ImageButton = findViewById(R.id.settingsButton)
+        val settingsButton: ImageButton = view.findViewById(R.id.settingsButton)
         settingsButton.setOnClickListener {
             if (gameOver) return@setOnClickListener
 
@@ -78,16 +78,13 @@ class MinerActivity : AppCompatActivity() {
                 startTimer()
             }
 
-            settingsButton.isEnabled = false // Отключаем повторные клики
+            settingsButton.isEnabled = false
 
-            val intent = Intent(this, MainActivity::class.java)
-            intent.putExtra("open_settings", true)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-            startActivity(intent)
-            finish()
+            // Открываем Settings в MainActivity
+            (activity as? MainActivity)?.openSettingsFragment()
         }
 
-        val homeButton: ImageView = findViewById(R.id.homeButton)
+        val homeButton: ImageView = view.findViewById(R.id.homeButton)
         homeButton.setOnClickListener {
             if (gameOver) return@setOnClickListener
 
@@ -96,12 +93,10 @@ class MinerActivity : AppCompatActivity() {
                 startTimer()
             }
 
-            homeButton.isEnabled = false // Отключаем повторные клики
+            homeButton.isEnabled = false
 
-            val intent = Intent(this, MainActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-            startActivity(intent)
-            finish()
+            // Открываем главный фрагмент в MainActivity
+            (activity as? MainActivity)?.openMainFragment()
         }
     }
 
@@ -176,15 +171,10 @@ class MinerActivity : AppCompatActivity() {
                 when {
                     correctGuesses == 0 -> showLoseDialog()
                     correctGuesses == 1 -> showWinDialog(score)
-                    else -> {} // уже отработал showWinDialog при 2 победах
+                    else -> {}
                 }
             }
         }.start()
-    }
-
-    private fun resetGame() {
-        timer?.cancel()
-        startGame()
     }
 
     private fun finishGame() {
@@ -202,8 +192,8 @@ class MinerActivity : AppCompatActivity() {
         return (0..3).shuffled().take(2).toSet()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         timer?.cancel()
     }
 
@@ -212,8 +202,6 @@ class MinerActivity : AppCompatActivity() {
             .rotationY(90f)
             .setDuration(150)
             .withEndAction {
-                openSoundPlayer?.start()
-
                 onEnd()
                 view.setBackgroundResource(R.drawable.select_cell_background)
                 view.rotationY = -90f
@@ -227,18 +215,14 @@ class MinerActivity : AppCompatActivity() {
 
     @SuppressLint("MissingInflatedId")
     private fun showWinDialog(score: Int) {
-        winSoundPlayer?.start()
-
-        val intent = Intent(this, WinDialogActivity::class.java)
+        val intent = Intent(requireContext(), WinDialogActivity::class.java)
         intent.putExtra("score", score)
         startActivity(intent)
     }
 
     @SuppressLint("MissingInflatedId")
     private fun showLoseDialog() {
-        loseSoundPlayer?.start()
-
-        val intent = Intent(this, LoseDialogActivity::class.java)
+        val intent = Intent(requireContext(), LoseDialogActivity::class.java)
         startActivity(intent)
     }
 }

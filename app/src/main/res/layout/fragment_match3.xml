@@ -34,14 +34,14 @@
     <TextView
         android:id="@+id/pointsText"
         android:layout_width="160dp"
-        android:layout_height="140px"
+        android:layout_height="160px"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="35dp"
+        android:layout_marginTop="32dp"
         android:background="@drawable/score_bg"
         android:text="POINTS: 0"
         android:textColor="#FFA726"
         android:textAlignment="center"
-        android:paddingVertical="22px"
+        android:paddingVertical="30px"
         android:textSize="25sp"
         android:textStyle="bold" />
 
@@ -116,11 +116,13 @@
     <!-- Следующие элементы -->
     <LinearLayout
         android:id="@+id/nextTilesContainer"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_below="@id/gridContainer"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
-        android:gravity="center_horizontal" />
+        android:layout_marginRight="10dp"
+        android:gravity="center_horizontal"
+        android:weightSum="3" />
 </RelativeLayout>

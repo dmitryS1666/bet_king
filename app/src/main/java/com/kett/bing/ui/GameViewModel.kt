@@ -11,6 +11,7 @@ class GameViewModel : ViewModel() {
     private var timer: CountDownTimer? = null
     val nextTiles = MutableLiveData<List<TileType>>(generateNextTiles())
     val movesLeft = MutableLiveData(15)
+    val gameEnded = MutableLiveData(false)
 
     private fun generateBoard(): List<List<Tile>> {
         val size = 3
@@ -33,16 +34,24 @@ class GameViewModel : ViewModel() {
 
     fun startGame() {
         movesLeft.value = 15
-
         timer = object : CountDownTimer(120_000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 timeLeft.value = (millisUntilFinished / 1000).toInt()
             }
-
             override fun onFinish() {
-                timeLeft.value = 0
+                endGame()
             }
         }.start()
+    }
+
+    fun endGame(silent: Boolean = false) {
+        stopTimer()
+        timeLeft.value = 0
+        movesLeft.value = 0
+
+        if (!silent) {
+            gameEnded.value = true // триггерим событие окончания
+        }
     }
 
     private fun generateNextTiles(count: Int = 3): List<TileType> =
@@ -77,8 +86,7 @@ class GameViewModel : ViewModel() {
 
         // Проверка на конец игры по ходам
         if (movesLeft.value == 0) {
-            stopTimer()
-            timeLeft.value = 0 // Завершаем игру
+            endGame()
             return
         }
 

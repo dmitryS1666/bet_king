@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Прозрачный фон всей области -->
+    <item android:width="85px" android:height="85px">
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/transparent" />
+        </shape>
+    </item>
+
+    <!-- Центральная полоса -->
+    <item android:width="95px" android:height="50px" android:gravity="center">
+        <shape android:shape="rectangle">
+            <solid android:color="#C06A02" />
+        </shape>
+    </item>
+
+    <!-- Картинка поверх всего -->
+    <item
+        android:width="95px"
+        android:height="95px"
+        android:gravity="center"
+        android:drawable="@drawable/small_king" />
+</layer-list>

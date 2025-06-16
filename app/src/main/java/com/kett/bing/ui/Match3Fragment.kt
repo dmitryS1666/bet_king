@@ -3,6 +3,7 @@ package com.kett.bing.ui
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -12,8 +13,12 @@ import android.widget.FrameLayout
 import android.widget.GridLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.kett.bing.MainActivity
+import com.kett.bing.MusicPlayerManager
+import com.kett.bing.R
 import com.kett.bing.databinding.FragmentMatch3Binding
 
 class Match3Fragment : Fragment() {
@@ -23,13 +28,45 @@ class Match3Fragment : Fragment() {
     private var selectedTile: Tile? = null
     private val tileViewMap = mutableMapOf<Tile, View>()
     private var gameEnded = false
+    private var swapSoundPlayer: MediaPlayer? = null
+    private var winSoundPlayer: MediaPlayer? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentMatch3Binding.inflate(inflater, container, false)
         viewModel = ViewModelProvider(this)[GameViewModel::class.java]
         viewModel.startGame()
         observeGame()
+
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        swapSoundPlayer = MediaPlayer.create(requireContext(), R.raw.migrate_sound)
+        winSoundPlayer = MediaPlayer.create(requireContext(), R.raw.win_sound)
+
+        // Кнопка "Домой"
+        binding.homeButton.setOnClickListener {
+            goToMainMenu()
+        }
+
+        // Кнопка "Настройки"
+        binding.settingsButton.setOnClickListener {
+            viewModel.endGame(true)
+            (activity as? MainActivity)?.openFragment(SettingsFragment())
+        }
+
+        // Обработка кнопки "Назад" — сразу уходим на главный экран
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                goToMainMenu()
+            }
+        })
+    }
+
+    private fun goToMainMenu() {
+        viewModel.endGame(silent = true) // не показываем экран окончания
+        (activity as? MainActivity)?.openMainFragment()
     }
 
     private fun observeGame() {
@@ -38,12 +75,10 @@ class Match3Fragment : Fragment() {
 
         viewModel.timeLeft.observe(viewLifecycleOwner) {
             binding.timeText.text = "TIME:\n$it"
-            checkGameOver()
         }
 
         viewModel.movesLeft.observe(viewLifecycleOwner) {
             binding.movesText.text = "$it"
-            checkGameOver()
         }
 
         viewModel.nextTiles.observe(viewLifecycleOwner) { nextTiles ->
@@ -51,20 +86,19 @@ class Match3Fragment : Fragment() {
             nextTiles.forEach { tileType ->
                 val imageView = ImageView(requireContext()).apply {
                     setImageResource(tileType.resId)
-                    layoutParams = LinearLayout.LayoutParams(150, 150).apply {
-                        marginEnd = 8
+                    layoutParams = LinearLayout.LayoutParams(200, 200).apply {
+                        marginEnd = 18
                     }
                 }
                 binding.nextTilesContainer.addView(imageView)
             }
         }
-    }
 
-    private fun checkGameOver() {
-        if (gameEnded) return
-        if ((viewModel.timeLeft.value ?: 1) <= 0 || (viewModel.movesLeft.value ?: 1) <= 0) {
-            gameEnded = true
-            showEndScreen()
+        viewModel.gameEnded.observe(viewLifecycleOwner) { ended ->
+            if (ended && !gameEnded) {
+                gameEnded = true
+                showEndScreen()
+            }
         }
     }
 
@@ -159,6 +193,8 @@ class Match3Fragment : Fragment() {
         val anim1 = view1.animate().translationXBy(dx).translationYBy(dy).setDuration(200)
         val anim2 = view2.animate().translationXBy(-dx).translationYBy(-dy).setDuration(200)
 
+        swapSoundPlayer?.start()
+
         if (onEnd != null) {
             anim2.withEndAction {
                 view1.translationX = 0f
@@ -223,19 +259,18 @@ class Match3Fragment : Fragment() {
         viewModel.board.value = viewModel.board.value
     }
 
-    private fun handleClick(tile: Tile) {
-        if (selected == null) {
-            selected = tile
-        } else {
-            viewModel.swapAndCheck(selected!!, tile)
-            selected = null
-        }
-    }
-
     private fun showEndScreen() {
         val score = viewModel.score.value ?: 0
         val intent = Intent(requireContext(), WinDialogActivity::class.java)
+        winSoundPlayer?.start()
+
         intent.putExtra("score", score)
         startActivity(intent)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        swapSoundPlayer?.release()
+        swapSoundPlayer = null
     }
 }
