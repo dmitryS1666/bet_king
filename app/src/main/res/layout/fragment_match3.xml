@@ -1,42 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/match3Root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:gravity="center_horizontal">
+    android:background="@drawable/main_bg"
+    android:padding="16dp">
 
+    <!-- Кнопка Домой -->
+    <ImageView
+        android:id="@+id/homeButton"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:src="@drawable/home_button"
+        android:layout_alignParentStart="true"
+        android:layout_margin="30dp"
+        android:scaleType="fitXY"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <!-- Кнопка Настройки -->
+    <ImageView
+        android:id="@+id/settingsButton"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:src="@drawable/settings_acitve"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="30dp"
+        android:scaleType="fitXY"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <!-- Очки по центру -->
     <TextView
         android:id="@+id/pointsText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Points: 0"
-        android:textSize="24sp"
-        android:textColor="@android:color/black" />
+        android:layout_width="160dp"
+        android:layout_height="140px"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="35dp"
+        android:background="@drawable/score_bg"
+        android:text="POINTS: 0"
+        android:textColor="#FFA726"
+        android:textAlignment="center"
+        android:paddingVertical="22px"
+        android:textSize="25sp"
+        android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/timeText"
-        android:layout_width="wrap_content"
+    <!-- Время (под очками, по центру) -->
+    <!-- Контейнер для timeText и statusBar в одной строке -->
+    <RelativeLayout
+        android:id="@+id/timeStatusContainer"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Time: 120"
-        android:textSize="18sp"
-        android:textColor="@android:color/black"
-        android:layout_marginTop="8dp" />
+        android:layout_below="@id/pointsText"
+        android:layout_marginTop="8dp">
 
+        <!-- Время — по центру строки -->
+        <TextView
+            android:id="@+id/timeText"
+            android:layout_width="250px"
+            android:layout_height="135px"
+            android:layout_centerHorizontal="true"
+            android:text="TIME:\n2:00"
+            android:textAlignment="center"
+            android:lineHeight="45px"
+            android:background="@drawable/timer_background"
+            android:textColor="#FFA726"
+            android:textSize="22sp" />
+
+        <!-- СтатусBar — по правому краю строки -->
+        <RelativeLayout
+            android:id="@+id/statusBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="28dp"
+            android:layout_centerVertical="true">
+
+            <ImageView
+                android:id="@+id/heartIcon"
+                android:layout_width="66dp"
+                android:layout_height="66dp"
+                android:src="@drawable/ic_heart"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true" />
+
+            <TextView
+                android:id="@+id/movesText"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginTop="40dp"
+                android:layout_marginLeft="-30dp"
+                android:layout_toEndOf="@id/heartIcon"
+                android:textAlignment="center"
+                android:background="@drawable/heart_count_bg"
+                android:text="15"
+                android:textColor="#FFA726"
+                android:textSize="20sp" />
+        </RelativeLayout>
+    </RelativeLayout>
+
+
+    <!-- Игровая сетка -->
     <GridLayout
         android:id="@+id/gridContainer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="340dp"
+        android:layout_height="340dp"
         android:rowCount="3"
         android:columnCount="3"
-        android:layout_marginTop="16dp" />
+        android:layout_below="@id/timeStatusContainer"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_grid_border"
+        android:padding="8dp" />
 
+    <!-- Следующие элементы -->
     <LinearLayout
         android:id="@+id/nextTilesContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:layout_below="@id/gridContainer"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
         android:gravity="center_horizontal" />
-</LinearLayout>
+</RelativeLayout>

@@ -1,13 +1,14 @@
 package com.kett.bing.ui
 
-import android.content.ClipData
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
-import android.util.Log
-import android.view.DragEvent
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.GridLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -19,6 +20,9 @@ class Match3Fragment : Fragment() {
     private lateinit var binding: FragmentMatch3Binding
     private lateinit var viewModel: GameViewModel
     private var selected: Tile? = null
+    private var selectedTile: Tile? = null
+    private val tileViewMap = mutableMapOf<Tile, View>()
+    private var gameEnded = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentMatch3Binding.inflate(inflater, container, false)
@@ -30,11 +34,18 @@ class Match3Fragment : Fragment() {
 
     private fun observeGame() {
         viewModel.board.observe(viewLifecycleOwner) { updateGrid(it) }
-        viewModel.score.observe(viewLifecycleOwner) { binding.pointsText.text = "Points: $it" }
+        viewModel.score.observe(viewLifecycleOwner) { binding.pointsText.text = "POINTS: $it" }
+
         viewModel.timeLeft.observe(viewLifecycleOwner) {
-            binding.timeText.text = "Time: $it"
-            if (it == 0) showEndScreen()
+            binding.timeText.text = "TIME:\n$it"
+            checkGameOver()
         }
+
+        viewModel.movesLeft.observe(viewLifecycleOwner) {
+            binding.movesText.text = "$it"
+            checkGameOver()
+        }
+
         viewModel.nextTiles.observe(viewLifecycleOwner) { nextTiles ->
             binding.nextTilesContainer.removeAllViews()
             nextTiles.forEach { tileType ->
@@ -49,75 +60,167 @@ class Match3Fragment : Fragment() {
         }
     }
 
+    private fun checkGameOver() {
+        if (gameEnded) return
+        if ((viewModel.timeLeft.value ?: 1) <= 0 || (viewModel.movesLeft.value ?: 1) <= 0) {
+            gameEnded = true
+            showEndScreen()
+        }
+    }
+
+    private fun isNeighbor(tile1: Tile, tile2: Tile?): Boolean {
+        if (tile2 == null) return false
+        val dr = kotlin.math.abs(tile1.row - tile2.row)
+        val dc = kotlin.math.abs(tile1.col - tile2.col)
+        return (dr == 1 && dc == 0) || (dr == 0 && dc == 1)
+    }
+
     private fun updateGrid(board: List<List<Tile>>) {
-        binding.gridContainer.removeAllViews()
-        binding.gridContainer.rowCount = board.size
-        binding.gridContainer.columnCount = board[0].size
+        val numRows = board.size
+        val numCols = board[0].size
+        val spacingPx = 25
 
-        board.flatten().forEach { tile ->
-            val imageView = ImageView(requireContext()).apply {
-                setImageResource(tile.type.resId)
-                layoutParams = GridLayout.LayoutParams().apply {
-                    width = 200
-                    height = 200
-                    bottomMargin = 8
-                    rightMargin = 8
+        binding.gridContainer.rowCount = numRows
+        binding.gridContainer.columnCount = numCols
+
+        val existingTiles = tileViewMap.keys.toMutableSet()
+
+        board.forEachIndexed { rowIndex, row ->
+            row.forEachIndexed { colIndex, tile ->
+                existingTiles.remove(tile) // Эта ячейка ещё активна
+
+                val isSelected = tile == selectedTile
+                val existingView = tileViewMap[tile]
+
+                if (existingView != null) {
+                    // Обновим выделение
+                    val background = (existingView.background as GradientDrawable)
+                    background.setColor(Color.parseColor(if (isSelected) "#FA8800" else "#C06A02"))
+                    return@forEachIndexed
                 }
 
-                tag = tile
+                // Новая плитка
+                val tileContainer = FrameLayout(requireContext()).apply {
+                    layoutParams = GridLayout.LayoutParams().apply {
+                        width = 270
+                        height = 270
+                        rowSpec = GridLayout.spec(rowIndex)
+                        columnSpec = GridLayout.spec(colIndex)
+                        setMargins(spacingPx, spacingPx, spacingPx, spacingPx)
+                    }
 
-                // Старт drag
-                setOnTouchListener { v, event ->
-                    val data = ClipData.newPlainText("", "${tile.row},${tile.col}")
-                    val shadowBuilder = View.DragShadowBuilder(v)
-                    v.startDragAndDrop(data, shadowBuilder, v, 0)
-                    true
-                }
+                    background = GradientDrawable().apply {
+                        shape = GradientDrawable.RECTANGLE
+                        cornerRadius = 80f
+                        setColor(Color.parseColor(if (isSelected) "#FA8800" else "#C06A02"))
+                        setStroke(4, Color.BLACK)
+                    }
 
-                // Обработка drop
-                setOnDragListener { v, event ->
-                    when (event.action) {
-                        DragEvent.ACTION_DRAG_STARTED -> true
-                        DragEvent.ACTION_DRAG_ENTERED -> {
-                            v.alpha = 0.5f
-                            true
-                        }
-                        DragEvent.ACTION_DRAG_EXITED -> {
-                            v.alpha = 1f
-                            true
-                        }
-                        DragEvent.ACTION_DROP -> {
-                            v.alpha = 1f
-                            val srcCoords = event.clipData.getItemAt(0).text.toString()
-                            val (srcRow, srcCol) = srcCoords.split(",").map { it.toInt() }
-                            val sourceTile = viewModel.board.value!![srcRow][srcCol]
-                            val targetTile = v.tag as Tile
-
-                            val rowDiff = kotlin.math.abs(srcRow - targetTile.row)
-                            val colDiff = kotlin.math.abs(srcCol - targetTile.col)
-
-                            Log.d("DRAG_DROP", "Drop from $srcRow,$srcCol to ${targetTile.row},${targetTile.col}")
-
-                            // Проверяем, что ячейки соседние по вертикали или горизонтали, но не по диагонали
-                            if ((rowDiff == 1 && colDiff == 0) || (rowDiff == 0 && colDiff == 1)) {
-                                viewModel.swapAndCheck(sourceTile, targetTile)
-                            } else {
-                                Log.d("DRAG_DROP", "Перемещение запрещено: ячейки не соседние")
-                            }
-                            true
-                        }
-
-                        DragEvent.ACTION_DRAG_ENDED -> {
-                            v.alpha = 1f
-                            true
-                        }
-                        else -> false
+                    isClickable = true
+                    isFocusable = true
+                    setOnClickListener {
+                        handleTileClick(tile)
                     }
                 }
-            }
 
-            binding.gridContainer.addView(imageView)
+                val imageView = ImageView(requireContext()).apply {
+                    setImageResource(tile.type.resId)
+                    layoutParams = FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        Gravity.CENTER
+                    )
+                }
+
+                tileContainer.addView(imageView)
+                binding.gridContainer.addView(tileContainer)
+                tileViewMap[tile] = tileContainer
+
+                animateTileAppear(tileContainer)
+            }
         }
+
+        // Анимировать исчезновение старых тайлов
+        for (oldTile in existingTiles) {
+            val viewToRemove = tileViewMap[oldTile]
+            if (viewToRemove != null) {
+                animateTileDisappear(viewToRemove) {
+                    binding.gridContainer.removeView(viewToRemove)
+                    tileViewMap.remove(oldTile)
+                }
+            }
+        }
+    }
+
+    private fun animateSwap(view1: View, view2: View, onEnd: (() -> Unit)? = null) {
+        val dx = view2.x - view1.x
+        val dy = view2.y - view1.y
+
+        val anim1 = view1.animate().translationXBy(dx).translationYBy(dy).setDuration(200)
+        val anim2 = view2.animate().translationXBy(-dx).translationYBy(-dy).setDuration(200)
+
+        if (onEnd != null) {
+            anim2.withEndAction {
+                view1.translationX = 0f
+                view1.translationY = 0f
+                view2.translationX = 0f
+                view2.translationY = 0f
+                onEnd()
+            }
+        }
+
+        anim1.start()
+        anim2.start()
+    }
+
+    private fun animateTileDisappear(view: View, onEnd: () -> Unit) {
+        view.animate()
+            .alpha(0f)
+            .scaleX(0f)
+            .scaleY(0f)
+            .setDuration(300)
+            .withEndAction { onEnd() }
+            .start()
+    }
+
+    private fun animateTileAppear(view: View) {
+        view.scaleX = 0f
+        view.scaleY = 0f
+        view.alpha = 0f
+        view.animate()
+            .alpha(1f)
+            .scaleX(1f)
+            .scaleY(1f)
+            .setDuration(300)
+            .start()
+    }
+
+    private fun handleTileClick(clickedTile: Tile) {
+        if (selectedTile == null) {
+            selectedTile = clickedTile
+        } else if (selectedTile == clickedTile) {
+            selectedTile = null // отмена выделения
+        } else if (isNeighbor(selectedTile!!, clickedTile)) {
+            val view1 = tileViewMap[selectedTile]
+            val view2 = tileViewMap[clickedTile]
+            val fromTile = selectedTile
+            val toTile = clickedTile
+
+            selectedTile = null // сброс до анимации
+
+            if (view1 != null && view2 != null && fromTile != null && toTile != null) {
+                animateSwap(view1, view2) {
+                    viewModel.swapAndCheck(fromTile, toTile)
+                }
+            } else {
+                viewModel.swapAndCheck(fromTile!!, toTile!!)
+            }
+        } else {
+            selectedTile = clickedTile
+        }
+
+        // Обновить UI с подсветкой
+        viewModel.board.value = viewModel.board.value
     }
 
     private fun handleClick(tile: Tile) {

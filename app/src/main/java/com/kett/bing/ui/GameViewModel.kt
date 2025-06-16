@@ -10,6 +10,7 @@ class GameViewModel : ViewModel() {
     val timeLeft = MutableLiveData(120)
     private var timer: CountDownTimer? = null
     val nextTiles = MutableLiveData<List<TileType>>(generateNextTiles())
+    val movesLeft = MutableLiveData(15)
 
     private fun generateBoard(): List<List<Tile>> {
         val size = 3
@@ -31,6 +32,8 @@ class GameViewModel : ViewModel() {
     }
 
     fun startGame() {
+        movesLeft.value = 15
+
         timer = object : CountDownTimer(120_000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 timeLeft.value = (millisUntilFinished / 1000).toInt()
@@ -55,6 +58,10 @@ class GameViewModel : ViewModel() {
         return tileType
     }
 
+    private fun refreshNextTiles() {
+        nextTiles.value = generateNextTiles()
+    }
+
     fun swapAndCheck(first: Tile, second: Tile) {
         val currentBoard = board.value!!.map { it.toMutableList() }.toMutableList()
 
@@ -65,63 +72,69 @@ class GameViewModel : ViewModel() {
 
         board.value = currentBoard
 
+        // Уменьшаем кол-во ходов
+        movesLeft.value = (movesLeft.value ?: 1) - 1
+
+        // Проверка на конец игры по ходам
+        if (movesLeft.value == 0) {
+            stopTimer()
+            timeLeft.value = 0 // Завершаем игру
+            return
+        }
+
         checkMatches()
     }
 
     private fun checkMatches() {
         val grid = board.value!!
-        val rowsToRemove = mutableSetOf<Int>()
-        val colsToRemove = mutableSetOf<Int>()
-        val matched = mutableSetOf<Pair<Int, Int>>()
+        val matched = mutableSetOf<Pair<Int, Int>>() // Все совпавшие позиции
 
-        // Проверяем строки
+        // Горизонтальные совпадения
         for (row in grid.indices) {
-            if (grid[row][0].type == grid[row][1].type && grid[row][1].type == grid[row][2].type) {
-                rowsToRemove.add(row)
+            for (col in 0..grid[row].size - 3) {
+                val t1 = grid[row][col].type
+                val t2 = grid[row][col + 1].type
+                val t3 = grid[row][col + 2].type
+                if (t1 == t2 && t2 == t3) {
+                    matched.add(Pair(row, col))
+                    matched.add(Pair(row, col + 1))
+                    matched.add(Pair(row, col + 2))
+                }
             }
         }
 
-        // Проверяем столбцы
-        for (col in 0 until grid[0].size) {
-            if (grid[0][col].type == grid[1][col].type && grid[1][col].type == grid[2][col].type) {
-                colsToRemove.add(col)
+        // Вертикальные совпадения
+        for (col in grid[0].indices) {
+            for (row in 0..grid.size - 3) {
+                val t1 = grid[row][col].type
+                val t2 = grid[row + 1][col].type
+                val t3 = grid[row + 2][col].type
+                if (t1 == t2 && t2 == t3) {
+                    matched.add(Pair(row, col))
+                    matched.add(Pair(row + 1, col))
+                    matched.add(Pair(row + 2, col))
+                }
             }
         }
 
-        if (rowsToRemove.isNotEmpty() || colsToRemove.isNotEmpty()) {
+        if (matched.isNotEmpty()) {
             val newBoard = grid.map { it.toMutableList() }.toMutableList()
-            // Обновляем строки
-            for (row in rowsToRemove) {
-                for (col in newBoard[row].indices) {
-                    newBoard[row][col] = Tile(TileType.random(), row, col)
-                }
-            }
 
-            // Обновляем столбцы
-            for (col in colsToRemove) {
-                for (row in newBoard.indices) {
-                    newBoard[row][col] = Tile(TileType.random(), row, col)
-                }
+            for ((r, c) in matched) {
+                // Вместо старого тайла — новый из nextTiles
+                newBoard[r][c] = Tile(consumeNextTile(), r, c)
             }
 
             board.value = newBoard
 
-            // Начисляем очки: 100 за каждую удалённую строку и столбец
-            score.value = (score.value ?: 0) + (rowsToRemove.size + colsToRemove.size) * 100
+            // Очки: +10 за каждый тайл
+            score.value = (score.value ?: 0) + matched.size * 10
 
-            // Проверяем заново после обновления доски
-            // Можно вызвать с небольшой задержкой, если нужен визуальный эффект
-            if (matched.isNotEmpty()) {
-                score.value = score.value?.plus(matched.size * 10)
-                val gridCopy = grid.map { it.toMutableList() }.toMutableList()
-                for ((r, c) in matched) {
-                    gridCopy[r][c] = Tile(consumeNextTile(), r, c)  // <-- вот здесь!
-                }
-                board.value = gridCopy
+            // Обновляем очередь следующих
+            refreshNextTiles()
 
-                // Рекурсивный вызов, если нужно
-                checkMatches()
-            }
+            // Проверяем рекурсивно: новые тайлы тоже могли создать матч
+            checkMatches()
         }
     }
 
