@@ -5,7 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/transparent">
+    android:background="@android:color/transparent"
+    android:fitsSystemWindows="false">
 
     <!-- Основной контейнер диалога -->
     <View
@@ -73,17 +74,16 @@
 
     <ImageView
         android:id="@+id/kingImage"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginEnd="-176dp"
-        android:layout_marginBottom="-281dp"
-        android:src="@drawable/king"
-        android:visibility="invisible"
+        android:layout_width="376dp"
+        android:layout_height="555dp"
+        android:layout_marginEnd="-50dp"
+        android:layout_marginBottom="-50dp"
         android:elevation="16dp"
+        android:src="@drawable/sad_king"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintWidth_percent="1"
-        app:layout_constraintHeight_percent="1"/>
+        app:layout_constraintHeight_percent="1"
+        app:layout_constraintWidth_percent="1" />
 
     <!-- Король ПОВЕРХ диалогового окна (справа снизу) -->
 

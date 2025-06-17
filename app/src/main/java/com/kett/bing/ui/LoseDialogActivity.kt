@@ -1,5 +1,7 @@
 package com.kett.bing.ui
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -42,19 +44,18 @@ class LoseDialogActivity : AppCompatActivity() {
             finish()
         }
 
-        // Включаем анимацию
+        kingImage.animate().cancel()
+
         kingImage.visibility = View.VISIBLE
+
         kingImage.translationX = 200f
         kingImage.translationY = 200f
         kingImage.alpha = 0f
-        kingImage.animate()
-            .translationX(0f)
-            .translationY(0f)
-            .alpha(1f)
-            .setStartDelay(300)
-            .setDuration(600)
-            .setInterpolator(DecelerateInterpolator())
-            .start()
+
+        kingImage.visibility = View.VISIBLE
+        kingImage.alpha = 1f
+        kingImage.translationX = 0f
+        kingImage.translationY = 0f
 
         // Вибрация
         val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator

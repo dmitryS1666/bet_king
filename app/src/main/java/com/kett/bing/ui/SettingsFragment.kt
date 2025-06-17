@@ -67,18 +67,18 @@ class SettingsFragment : Fragment() {
             val url = "https://bedkingthegame.com/policy"
             val intent = Intent(requireContext(), BannerWebActivity::class.java)
             intent.putExtra("url", url)
+            intent.putExtra("showLoader", false)  // НЕ показывать прелоадер
             startActivity(intent)
         }
 
         view.findViewById<Button>(R.id.deleteScoreButton).setOnClickListener {
-            // Очистка результата
-            val prefs = requireContext().getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+            val prefs = requireContext().getSharedPreferences("UserData", Context.MODE_PRIVATE)
             prefs.edit()
-                .remove("game_score") // замените на нужный ключ, если другой
+                .putInt("total_score", 0) // Обнуляем счёт
+                .putBoolean("bonus_game_shown", false)
                 .apply()
 
-            // Показываем Toast
-            Toast.makeText(requireContext(), "Game results cleared", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Score reset to 0", Toast.LENGTH_SHORT).show()
         }
 
         view.findViewById<ImageView>(R.id.btnHome).setOnClickListener {

@@ -71,6 +71,8 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     implementation(libs.androidx.lifecycle.viewmodel.android)
     implementation(libs.play.services.maps)
+    implementation(libs.androidx.compiler)
+    implementation(libs.protolite.well.known.types)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

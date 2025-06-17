@@ -1,5 +1,7 @@
 package com.kett.bing.ui
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -10,6 +12,7 @@ import android.os.Vibrator
 import android.view.View
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -20,7 +23,7 @@ import com.kett.bing.R
 class WinDialogActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.win_dialog) // или как называется твой layout
+        setContentView(R.layout.win_dialog)
 
         window.decorView.systemUiVisibility = (
                 View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
@@ -33,13 +36,20 @@ class WinDialogActivity : AppCompatActivity() {
         window.navigationBarColor = Color.TRANSPARENT
         window.statusBarColor = Color.TRANSPARENT
 
-        // Получение score
         val score = intent.getIntExtra("score", 0)
 
         val fireworksImage = findViewById<ImageView>(R.id.fireworksImage)
         val kingImage = findViewById<ImageView>(R.id.kingImage)
         val scoreText = findViewById<TextView>(R.id.scoreText)
         val menuButton = findViewById<ImageButton>(R.id.menuButton)
+        val bonusGameButton = findViewById<ImageButton>(R.id.bonusGameButton)
+
+        val gameType = intent.getStringExtra("gameType") ?: "match3"
+        if (gameType == "match3") {
+            bonusGameButton.visibility = View.VISIBLE
+        } else {
+            bonusGameButton.visibility = View.GONE
+        }
 
         scoreText.text = "TOTAL\nPOINTS: $score"
 
@@ -51,7 +61,16 @@ class WinDialogActivity : AppCompatActivity() {
             finish()
         }
 
-        // Включаем анимацию
+        // Обработка нажатия на кнопку Bonus Game
+        bonusGameButton.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            intent.putExtra("openMiner", true)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            startActivity(intent)
+            finish()
+        }
+
+        // Анимация фейерверков
         fireworksImage.visibility = View.VISIBLE
         fireworksImage.alpha = 0f
         fireworksImage.animate()
@@ -60,18 +79,18 @@ class WinDialogActivity : AppCompatActivity() {
             .setInterpolator(AccelerateInterpolator())
             .start()
 
+        kingImage.animate().cancel()
+
         kingImage.visibility = View.VISIBLE
+
         kingImage.translationX = 200f
         kingImage.translationY = 200f
         kingImage.alpha = 0f
-        kingImage.animate()
-            .translationX(0f)
-            .translationY(0f)
-            .alpha(1f)
-            .setStartDelay(300)
-            .setDuration(600)
-            .setInterpolator(DecelerateInterpolator())
-            .start()
+
+        kingImage.visibility = View.VISIBLE
+        kingImage.alpha = 1f
+        kingImage.translationX = 0f
+        kingImage.translationY = 0f
 
         // Вибрация
         val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator

@@ -38,7 +38,9 @@ class LoadingFragment : Fragment() {
 
                 if (progress == 100) {
                     view?.postDelayed({
-                        navigateToMainScreen()
+                        if (isAdded && view != null) {  // <--- проверяем, что фрагмент прикреплен и view не null
+                            navigateToMainScreen()
+                        }
                     }, 300)
                 }
             }
@@ -47,6 +49,8 @@ class LoadingFragment : Fragment() {
     }
 
     private fun navigateToMainScreen() {
+        if (!isAdded) return  // фрагмент уже отсоединён — прерываем
+
         (activity as? MainActivity)?.openMainFragment()
         parentFragmentManager.beginTransaction().remove(this).commit()
     }

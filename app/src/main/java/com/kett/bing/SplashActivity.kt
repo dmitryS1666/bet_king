@@ -1,21 +1,22 @@
 package com.kett.bing
 
+import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import android.view.WindowManager
+import android.webkit.WebView
 import android.widget.ImageView
-import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
+import androidx.core.view.WindowCompat
 import com.kett.bing.ui.LoadingFragment
 import okhttp3.*
 import org.json.JSONObject
 import java.io.IOException
+import java.lang.StrictMath.log
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.TimeUnit
@@ -23,7 +24,6 @@ import java.util.concurrent.TimeUnit
 class SplashActivity : AppCompatActivity() {
 
     private lateinit var bannerView: ImageView
-    private lateinit var progressBar: ProgressBar
     private val prefs by lazy {
         getSharedPreferences("banner_prefs", MODE_PRIVATE)
     }
@@ -38,46 +38,65 @@ class SplashActivity : AppCompatActivity() {
         .build()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(R.style.Theme_KettBing)
+        setTheme(R.style.Theme_KettBing_Splash)
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_splash)
-
-        bannerView = findViewById(R.id.bannerImageView)
-        progressBar = findViewById(R.id.progressBar)
-
-        clickBlocker = findViewById(R.id.clickBlocker)
-        clickBlocker.visibility = View.VISIBLE // блокируем всё
-
-        window.decorView.systemUiVisibility = (
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-                        View.SYSTEM_UI_FLAG_FULLSCREEN or
-                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                )
+        warmUpWebView()
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.splashRoot, LoadingFragment())
+                .replace(R.id.loadingFragmentContainer, LoadingFragment())
                 .commit()
         }
 
-        // теперь запускаем проверку интернета
+        bannerView = findViewById(R.id.bannerImageView)
+        clickBlocker = findViewById(R.id.clickBlocker)
+        clickBlocker.visibility = View.VISIBLE
+
+        hideSystemUI()
+
         checkConnectionAndLoadBanner()
+    }
+
+    @SuppressLint("InlinedApi", "WrongConstant")
+    private fun hideSystemUI() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val controller = WindowCompat.getInsetsController(window, window.decorView)
+            controller?.hide(
+                android.view.WindowInsets.Type.statusBars() or android.view.WindowInsets.Type.navigationBars()
+            )
+            controller?.systemBarsBehavior =
+                android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        } else {
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility = (
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                            or View.SYSTEM_UI_FLAG_FULLSCREEN
+                            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    )
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                window.setFlags(
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN
+                )
+                window.setFlags(
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+                )
+            }
+        }
     }
 
     private fun checkConnectionAndLoadBanner() {
         Thread {
-            val isConnected = checkInternetAccess()
+            val hasInternet = checkInternetAccess()
             runOnUiThread {
-                if (isConnected) {
-                    val cached = prefs.getString("banner_json", null)
-                    if (cached != null) {
-                        showBanner(JSONObject(cached))
-                    } else {
-                        fetchBanner()
-                    }
+                if (hasInternet) {
+                    fetchBanner()
                 } else {
                     goToMain()
                 }
@@ -130,43 +149,33 @@ class SplashActivity : AppCompatActivity() {
         })
     }
 
+    private fun warmUpWebView() {
+        val context = applicationContext
+        WebView(context).apply {
+            settings.javaScriptEnabled = true
+            loadDataWithBaseURL(null, "<html></html>", "text/html", "UTF-8", null)
+        }
+    }
+
     private fun showBanner(json: JSONObject) {
         val action = json.optString("GoKing", null)
-        val imageUrl = json.optString("kingImg", null)
 
-        if (imageUrl != null) {
-            Glide.with(this)
-                .load(imageUrl)
-                .centerCrop()
-                .into(object : CustomTarget<Drawable>() {
-                    override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
-                        if (!isActive || isFinishing || isDestroyed) return
-                        clickBlocker.visibility = View.GONE // теперь можно кликать
-                        bannerView.setImageDrawable(resource)
-                        bannerView.visibility = View.VISIBLE
-                        progressBar.visibility = View.GONE
-
-                        bannerView.setOnClickListener {
-                            if (action?.startsWith("https://") == true) {
-                                val intent = Intent(this@SplashActivity, BannerWebActivity::class.java)
-                                intent.putExtra("url", action)
-                                startActivity(intent)
-                                finish()
-                            } else {
-                                finish()
-                            }
-                        }
-                    }
-
-                    override fun onLoadFailed(errorDrawable: Drawable?) {
-                        if (!isActive || isFinishing || isDestroyed) return
-                        goToMain()
-                    }
-
-                    override fun onLoadCleared(placeholder: Drawable?) {}
-                })
+        if (action?.startsWith("https://") == true) {
+            // Переход сразу в WebView, без отображения баннера
+            runOnUiThread {
+                if (!isActive || isFinishing || isDestroyed) return@runOnUiThread
+                clickBlocker.visibility = View.GONE
+                val intent = Intent(this@SplashActivity, BannerWebActivity::class.java)
+                intent.putExtra("url", action)
+                startActivity(intent)
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                finish()
+            }
         } else {
-            goToMain()
+            // Если URL некорректен — просто запускаем основное активити
+            runOnUiThread {
+                goToMain()
+            }
         }
     }
 
@@ -189,6 +198,11 @@ class SplashActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         isActive = false
+    }
+
+    override fun onResume() {
+        super.onResume()
+        hideSystemUI()
     }
 }
 

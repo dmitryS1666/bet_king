@@ -1,6 +1,7 @@
 package com.kett.bing.ui
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -14,6 +15,9 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.kett.bing.MainActivity
 import com.kett.bing.R
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MinerFragment : Fragment() {
 
@@ -213,8 +217,51 @@ class MinerFragment : Fragment() {
             .start()
     }
 
+    private fun saveGameResult(win: Boolean, score: Int) {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val timestamp = dateFormat.format(Date())
+
+        val prefs = requireActivity().getSharedPreferences("UserData", Context.MODE_PRIVATE)
+        val editor = prefs.edit()
+
+        if (win) {
+            editor.putString("lastWinTime", timestamp)
+            val totalScore = prefs.getInt("totalScore", 0) + score
+            editor.putInt("totalScore", totalScore)
+
+            // ✅ Добавляем в историю побед
+            addGameResultToList("winTimes")
+        } else {
+            editor.putString("lastLoseTime", timestamp)
+
+            // ✅ Добавляем в историю поражений
+            addGameResultToList("loseTimes")
+        }
+
+        editor.putInt("lastGameScore", score)
+        editor.apply()
+    }
+
+    private fun addGameResultToList(key: String) {
+        val dateFormat = SimpleDateFormat("dd.MM.yyyy\nHH:mm", Locale.getDefault())
+        val timestamp = dateFormat.format(Date())
+
+        val prefs = requireActivity().getSharedPreferences("UserData", Context.MODE_PRIVATE)
+        val existing = prefs.getStringSet(key, mutableSetOf())?.toMutableSet() ?: mutableSetOf()
+
+        existing.add(timestamp)
+
+        // Оставляем только 50 последних записей
+        val trimmed = existing.sortedDescending().take(50).toMutableSet()
+
+        prefs.edit()
+            .putStringSet(key, trimmed)
+            .apply()
+    }
+
     @SuppressLint("MissingInflatedId")
     private fun showWinDialog(score: Int) {
+        saveGameResult(win = true, score = score)
         val intent = Intent(requireContext(), WinDialogActivity::class.java)
         intent.putExtra("score", score)
         startActivity(intent)
@@ -222,6 +269,7 @@ class MinerFragment : Fragment() {
 
     @SuppressLint("MissingInflatedId")
     private fun showLoseDialog() {
+        saveGameResult(win = false, score = 0)
         val intent = Intent(requireContext(), LoseDialogActivity::class.java)
         startActivity(intent)
     }

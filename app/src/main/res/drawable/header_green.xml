@@ -1,7 +1,0 @@
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#015440" /> <!-- насыщенный зелёный (Material Green 700) -->
-    <corners android:radius="12dp" />
-    <padding
-        android:left="1dp"
-        android:right="8dp" />
-</shape>
